@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luminary — Mood & Emotional Wellness</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── LIGHT THEME ─── */
+[data-theme="light"] {
+  --bg: #f7f4ef;
+  --bg-bright: #fffef5;
+  --bg-dim: #e8e4dc;
+  --surface: #ffffff;
+  --surface2: #f0ece5;
+  --border: rgba(0,0,0,0.09);
+  --text: #1c1a16;
+  --text2: #3a3630;
+  --muted: rgba(0,0,0,0.45);
+  --accent: #b07d4f;
+  --sidebar-bg: #ffffff;
+  --shadow: rgba(0,0,0,0.07);
+  --paper-bg: #fdfbf4;
+  --paper-line: rgba(0,0,0,0.06);
+  --paper-shadow: rgba(120,100,60,0.12);
+  --toggle-bg: #e2ddd5;
+  --toggle-knob: #b07d4f;
+}
+
+/* ─── DARK THEME ─── */
+[data-theme="dark"] {
+  --bg: #141210;
+  --bg-bright: #1e1c18;
+  --bg-dim: #0e0d0a;
+  --surface: #1e1c18;
+  --surface2: #272420;
+  --border: rgba(255,255,255,0.08);
+  --text: #f2ede4;
+  --text2: #c8bfb0;
+  --muted: rgba(255,255,255,0.42);
+  --accent: #d4965a;
+  --sidebar-bg: #1a1814;
+  --shadow: rgba(0,0,0,0.3);
+  --paper-bg: #1e1b14;
+  --paper-line: rgba(255,255,255,0.05);
+  --paper-shadow: rgba(0,0,0,0.4);
+  --toggle-bg: #3a3530;
+  --toggle-knob: #d4965a;
+}
+
+/* ─── MOOD COLORS (same both themes) ─── */
+:root {
+  --joy:      #d4a017;  --joy-bg:      rgba(212,160,23,0.12);
+  --calm:     #1a9e6e;  --calm-bg:     rgba(26,158,110,0.12);
+  --sad:      #4a8fd1;  --sad-bg:      rgba(74,143,209,0.12);
+  --angry:    #d44040;  --angry-bg:    rgba(212,64,64,0.12);
+  --anxious:  #9b5de5;  --anxious-bg:  rgba(155,93,229,0.12);
+  --neutral:  #6b7c8d;  --neutral-bg:  rgba(107,124,141,0.12);
+  --excited:  #e0690a;  --excited-bg:  rgba(224,105,10,0.12);
+  --grateful: #1aaa6a;  --grateful-bg: rgba(26,170,106,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.5s ease, color 0.3s ease;
+}
+
+/* Mood ambient overlay */
+#mood-ambient {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+  transition: background 1.2s ease, opacity 1.2s ease;
+  opacity: 0;
+}
+
+.app { position: relative; z-index: 1; display: flex; min-height: 100vh; }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: 230px; min-height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 28px 0;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s ease, background 0.3s;
+  box-shadow: 2px 0 16px var(--shadow);
+}
+
+.logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.logo h1 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--accent); letter-spacing: 0.5px; }
+.logo p  { font-size: 11px; color: var(--muted); margin-top: 3px; letter-spacing: 1.2px; text-transform: uppercase; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 24px; cursor: pointer;
+  color: var(--muted); font-size: 14px; font-weight: 400;
+  transition: all 0.2s; border-left: 3px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: rgba(128,100,60,0.05); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(176,125,79,0.09); font-weight: 500; }
+.nav-icon { font-size: 17px; width: 22px; text-align: center; }
+
+.nav-section { margin-top: 10px; }
+.nav-section-label {
+  padding: 8px 24px 4px; font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.8px; font-weight: 600;
+}
+
+.sidebar-footer { margin-top: auto; padding: 18px 24px; border-top: 1px solid var(--border); }
+
+/* ─── THEME TOGGLE ─── */
+.theme-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 24px; cursor: pointer;
+  color: var(--muted); font-size: 13px;
+}
+.toggle-track {
+  width: 42px; height: 22px; border-radius: 11px;
+  background: var(--toggle-bg);
+  position: relative; transition: background 0.3s; flex-shrink: 0;
+  cursor: pointer;
+}
+.toggle-knob {
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--toggle-knob);
+  transition: transform 0.3s; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+[data-theme="dark"] .toggle-knob { transform: translateX(20px); }
+
+/* ─── MAIN ─── */
+.main { margin-left: 230px; flex: 1; padding: 36px 44px; max-width: 1120px; }
+
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ─── PAGE HEADER ─── */
+.page-header { margin-bottom: 32px; }
+.page-header h2 { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.page-header h2 em { color: var(--accent); font-style: italic; }
+.page-header p { color: var(--muted); font-size: 15px; margin-top: 6px; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px; padding: 26px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  transition: background 0.3s, border-color 0.3s;
+}
+.card-title {
+  font-size: 12px; font-weight: 600; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ─── GRIDS ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+/* ─── INPUTS ─── */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  font-size: 12px; color: var(--muted); letter-spacing: 0.9px;
+  text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: 500;
+}
+input[type=text], input[type=date], textarea {
+  width: 100%; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px 16px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s; resize: vertical;
+}
+input[type=text]:focus, input[type=date]:focus, textarea:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(176,125,79,0.14);
+}
+input[type=date] { color-scheme: light; }
+[data-theme="dark"] input[type=date] { color-scheme: dark; }
+
+/* ─── PAPER REFLECTION ─── */
+.paper-card {
+  background: var(--paper-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px 18px 18px 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 4px 4px 20px var(--paper-shadow), -1px 0 0 rgba(176,125,79,0.3);
+  margin-bottom: 20px;
+}
+.paper-card::before {
+  /* red margin line */
+  content:'';
+  position: absolute;
+  left: 52px; top: 0; bottom: 0;
+  width: 1.5px;
+  background: rgba(212,100,100,0.25);
+  z-index: 1;
+}
+.paper-header {
+  padding: 18px 24px 12px 62px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--paper-line);
+  position: relative; z-index: 2;
+}
+.pen-icon { font-size: 20px; }
+.paper-title-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 600; color: var(--accent);
+  letter-spacing: 0.3px;
+}
+.paper-date-label {
+  margin-left: auto; font-size: 12px; color: var(--muted);
+  font-family: 'Caveat', cursive;
+}
+.paper-inner {
+  padding: 0 24px 24px 62px;
+  position: relative; z-index: 2;
+}
+/* Ruled lines */
+.paper-inner::before {
+  content:'';
+  position: absolute;
+  left: 62px; right: 24px; top: 0; bottom: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 31px,
+    var(--paper-line) 31px,
+    var(--paper-line) 32px
+  );
+  pointer-events: none;
+}
+#reflection-text {
+  background: transparent;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0;
+  padding: 8px 0;
+  font-family: 'Caveat', cursive;
+  font-size: 19px;
+  line-height: 32px;
+  color: var(--text2);
+  min-height: 192px;
+  width: 100%;
+  resize: none;
+  position: relative; z-index: 3;
+}
+#reflection-text::placeholder { color: var(--muted); font-style: italic; opacity: 0.7; }
+
+/* ─── MOOD GRID ─── */
+.mood-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.mood-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 16px 10px; border-radius: 14px;
+  border: 2px solid var(--border); background: var(--surface2);
+  cursor: pointer; transition: all 0.22s;
+  color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+}
+.mood-btn .emoji { font-size: 26px; }
+.mood-btn:hover { border-color: rgba(128,100,60,0.3); color: var(--text); transform: translateY(-3px); box-shadow: 0 6px 16px var(--shadow); }
+.mood-btn.selected { color: var(--text); transform: translateY(-3px); box-shadow: 0 8px 24px -4px var(--shadow); }
+.mood-btn[data-mood="Joy"].selected      { border-color:var(--joy);     background:var(--joy-bg); }
+.mood-btn[data-mood="Calm"].selected     { border-color:var(--calm);    background:var(--calm-bg); }
+.mood-btn[data-mood="Sad"].selected      { border-color:var(--sad);     background:var(--sad-bg); }
+.mood-btn[data-mood="Angry"].selected    { border-color:var(--angry);   background:var(--angry-bg); }
+.mood-btn[data-mood="Anxious"].selected  { border-color:var(--anxious); background:var(--anxious-bg); }
+.mood-btn[data-mood="Neutral"].selected  { border-color:var(--neutral); background:var(--neutral-bg); }
+.mood-btn[data-mood="Excited"].selected  { border-color:var(--excited); background:var(--excited-bg); }
+.mood-btn[data-mood="Grateful"].selected { border-color:var(--grateful);background:var(--grateful-bg); }
+
+/* ─── INTENSITY SLIDER ─── */
+.intensity-wrap { margin: 18px 0 4px; }
+.intensity-label { font-size: 14px; color: var(--muted); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.intensity-label span { color: var(--accent); font-weight: 600; font-size: 16px; }
+input[type=range] {
+  width: 100%; -webkit-appearance: none; height: 6px;
+  border-radius: 3px; background: var(--surface2); outline: none; border: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--accent); cursor: pointer;
+  box-shadow: 0 0 10px rgba(176,125,79,0.45);
+  border: 2px solid var(--surface);
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  padding: 12px 26px; border-radius: 12px; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+  transition: all 0.2s; letter-spacing: 0.2px;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 8px 24px -4px rgba(176,125,79,0.4); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: rgba(128,100,60,0.3); background: var(--surface2); }
+
+/* ─── MOOD BADGE ─── */
+.mood-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;
+}
+
+/* ─── TIMELINE ─── */
+.timeline-entry {
+  display: flex; gap: 16px; padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.timeline-entry:last-child { border-bottom: none; }
+.timeline-left { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 52px; }
+.timeline-date { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.3; }
+.timeline-dot-wrap { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid var(--border); }
+.timeline-content { flex: 1; }
+.timeline-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.timeline-note { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.timeline-reflection {
+  margin-top: 8px; padding: 12px 16px;
+  background: var(--surface2); border-radius: 10px;
+  font-size: 14px; color: var(--muted); display: none;
+  line-height: 1.7; border-left: 3px solid;
+  font-family: 'Caveat', cursive; font-size: 16px;
+}
+.timeline-reflection.open { display: block; }
+.expand-btn {
+  background: none; border: none; color: var(--muted);
+  font-size: 12px; cursor: pointer; padding: 2px 8px;
+  border-radius: 4px; transition: color 0.2s; margin-left: auto;
+}
+.expand-btn:hover { color: var(--text); }
+
+/* ─── CALENDAR ─── */
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.cal-nav {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted); padding: 7px 14px; border-radius: 10px;
+  cursor: pointer; font-size: 18px; transition: all 0.2s;
+}
+.cal-nav:hover { color: var(--text); border-color: rgba(128,100,60,0.3); }
+.cal-month { font-family: 'Playfair Display', serif; font-size: 20px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 7px; }
+.cal-day-name { text-align: center; font-size: 12px; color: var(--muted); padding: 5px; letter-spacing: 0.5px; font-weight: 500; }
+.cal-cell {
+  aspect-ratio: 1; border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+  border: 2px solid transparent; gap: 2px; background: var(--surface2);
+}
+.cal-cell.empty { cursor: default; background: transparent; }
+.cal-cell.today { border-color: var(--accent) !important; }
+.cal-cell:hover:not(.empty) { transform: scale(1.07); box-shadow: 0 4px 14px var(--shadow); }
+.cal-cell .day-num { font-size: 13px; font-weight: 500; }
+.cal-cell .day-emoji { font-size: 14px; }
+
+/* ─── STAT CARDS ─── */
+.stat-card {
+  background: var(--surface2); border-radius: 16px;
+  padding: 20px 22px; border: 1px solid var(--border);
+}
+.stat-label { font-size: 11px; color: var(--muted); letter-spacing: 1.1px; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+.stat-value { font-family: 'Playfair Display', serif; font-size: 30px; color: var(--text); line-height: 1; }
+.stat-sub { font-size: 13px; color: var(--muted); margin-top: 5px; }
+
+/* ─── DISTRIBUTION ─── */
+.dist-row { margin-bottom: 12px; }
+.dist-label { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px; }
+.dist-bar-wrap { height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.dist-bar { height: 100%; border-radius: 4px; transition: width 0.9s ease; }
+
+/* ─── SVG WAVE CHART ─── */
+.wave-chart-container {
+  position: relative; width: 100%; overflow: visible;
+}
+.wave-chart-svg { width: 100%; overflow: visible; }
+.wave-day-label { font-size: 12px; fill: var(--muted); font-family: 'DM Sans', sans-serif; }
+.wave-score-label { font-size: 11px; fill: var(--muted); font-family: 'DM Sans', sans-serif; }
+.wave-dot { cursor: pointer; transition: r 0.2s; }
+.wave-dot:hover { r: 8; }
+.wave-tooltip {
+  position: absolute; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 14px; font-size: 13px; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s;
+  box-shadow: 0 4px 16px var(--shadow);
+  white-space: nowrap; z-index: 10;
+}
+
+/* ─── INSIGHT CHIPS ─── */
+.insight-chip {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 18px; background: var(--surface2);
+  border-radius: 14px; border: 1px solid var(--border); margin-bottom: 12px;
+}
+.insight-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.insight-text { font-size: 14px; line-height: 1.55; }
+.insight-text strong { color: var(--text); display: block; font-size: 14px; margin-bottom: 2px; font-weight: 600; }
+.insight-text span { color: var(--muted); }
+
+/* ─── PREDICTION ─── */
+.prediction-card {
+  background: linear-gradient(135deg, var(--surface2), rgba(155,93,229,0.08));
+  border: 1px solid rgba(155,93,229,0.2);
+  border-radius: 18px; padding: 22px 26px;
+  display: flex; align-items: center; gap: 22px; margin-bottom: 22px;
+}
+.prediction-emoji { font-size: 52px; }
+.prediction-text h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 5px; }
+.prediction-text p { color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+/* ─── VOLATILITY ─── */
+.volatility-meter {
+  height: 10px; border-radius: 5px;
+  background: linear-gradient(90deg,var(--calm),var(--joy),var(--excited),var(--angry));
+  position: relative; margin: 14px 0;
+}
+.volatility-needle {
+  position: absolute; top: 50%; transform: translate(-50%,-50%);
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--text); border: 3px solid var(--surface);
+  transition: left 0.9s ease; box-shadow: 0 0 10px rgba(0,0,0,0.25);
+}
+
+/* ─── CORRELATIONS ─── */
+.corr-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 8px;
+  font-size: 13px; margin: 3px; border: 1px solid;
+}
+
+/* ─── WORD CLOUD ─── */
+.word-cloud { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
+.word-chip {
+  padding: 5px 14px; border-radius: 20px;
+  background: var(--surface2); border: 1px solid var(--border);
+  cursor: default; transition: all 0.2s; color: var(--text);
+  font-size: 14px;
+}
+.word-chip:hover { border-color: rgba(128,100,60,0.3); transform: translateY(-1px); }
+
+/* ─── FILTER ─── */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-chip {
+  padding: 7px 16px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font-size: 13px; cursor: pointer;
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.filter-chip:hover:not(.active) { border-color: rgba(128,100,60,0.3); color: var(--text); }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 22px; font-size: 14px;
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s ease; z-index: 1000;
+  box-shadow: 0 8px 32px var(--shadow); color: var(--text);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-color: rgba(26,158,110,0.4); }
+.toast.error { border-color: rgba(212,64,64,0.4); }
+
+/* ─── EMPTY STATE ─── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state .emoji { font-size: 52px; display: block; margin-bottom: 16px; }
+.empty-state h3 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); margin-bottom: 8px; }
+.empty-state p { font-size: 15px; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(128,100,60,0.2); border-radius: 3px; }
+
+/* ─── HAMBURGER ─── */
+.hamburger {
+  display: none; position: fixed; top: 16px; left: 16px; z-index: 200;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 14px; cursor: pointer;
+  font-size: 19px; color: var(--text); box-shadow: 0 2px 10px var(--shadow);
+}
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 90; }
+
+/* ─── SENTIMENT MINI BARS ─── */
+.sentiment-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.sentiment-row:last-child { border-bottom: none; }
+.sentiment-bar-track {
+  flex: 1; height: 8px; background: var(--surface2);
+  border-radius: 4px; overflow: hidden; position: relative;
+}
+.sentiment-bar-fill { height: 100%; border-radius: 4px; transition: width 0.7s ease; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: flex; align-items: center; }
+  .overlay.show { display: block; }
+  .main { margin-left: 0; padding: 20px 16px; padding-top: 68px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .mood-grid { grid-template-columns: repeat(4,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Mood ambient background -->
+<div id="mood-ambient"></div>
+
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="logo">
+      <h1>Luminary</h1>
+      <p>Emotional Wellness</p>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="showPage('log')"><span class="nav-icon">✦</span> Log Mood</div>
+      <div class="nav-item" onclick="showPage('timeline')"><span class="nav-icon">◈</span> Timeline</div>
+      <div class="nav-item" onclick="showPage('calendar')"><span class="nav-icon">◻</span> Calendar</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Insights</div>
+      <div class="nav-item" onclick="showPage('summary')"><span class="nav-icon">◉</span> Weekly Summary</div>
+      <div class="nav-item" onclick="showPage('insights')"><span class="nav-icon">◈</span> Insights & Trends</div>
+      <div class="nav-item" onclick="showPage('analytics')"><span class="nav-icon">⬡</span> Analytics</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <!-- Theme Toggle -->
+      <div class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">☀️</span>
+        <div class="toggle-track"><div class="toggle-knob"></div></div>
+        <span id="theme-label" style="font-size:13px;color:var(--muted);">Light</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);padding:8px 0 0;">Your data stays local 🔒</div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── LOG PAGE ── -->
+    <div class="page active" id="page-log">
+      <div class="page-header">
+        <h2>How are you <em>feeling</em> today?</h2>
+        <p>Check in with yourself — write first, then choose your mood.</p>
+      </div>
+
+      <!-- 1. Quick Note + Date row -->
+      <div class="grid-2" style="margin-bottom:0;">
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title"><span>◎</span> Quick Note</div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">What's on your mind?</label>
+            <input type="text" id="quick-note" placeholder="A brief thought for today…" maxlength="120">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Date</label>
+            <input type="date" id="entry-date">
+          </div>
+        </div>
+
+        <!-- 2. Paper Reflection (right column) -->
+        <div class="paper-card">
+          <div class="paper-header">
+            <span class="pen-icon">🖊️</span>
+            <span class="paper-title-text">Today's Reflection</span>
+            <span class="paper-date-label" id="paper-date-display"></span>
+          </div>
+          <div class="paper-inner">
+            <textarea id="reflection-text" placeholder="Dear diary… write freely about your day, your feelings, your thoughts. This is your space." rows="6"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Mood Selection below -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-title"><span>◐</span> Select Your Mood</div>
+        <div class="mood-grid">
+          <button class="mood-btn" data-mood="Joy"      onclick="selectMood('Joy')">     <span class="emoji">😊</span>Joy</button>
+          <button class="mood-btn" data-mood="Calm"     onclick="selectMood('Calm')">    <span class="emoji">😌</span>Calm</button>
+          <button class="mood-btn" data-mood="Sad"      onclick="selectMood('Sad')">     <span class="emoji">😢</span>Sad</button>
+          <button class="mood-btn" data-mood="Angry"    onclick="selectMood('Angry')">   <span class="emoji">😠</span>Angry</button>
+          <button class="mood-btn" data-mood="Anxious"  onclick="selectMood('Anxious')"> <span class="emoji">😰</span>Anxious</button>
+          <button class="mood-btn" data-mood="Neutral"  onclick="selectMood('Neutral')"> <span class="emoji">😐</span>Neutral</button>
+          <button class="mood-btn" data-mood="Excited"  onclick="selectMood('Excited')"> <span class="emoji">🤩</span>Excited</button>
+          <button class="mood-btn" data-mood="Grateful" onclick="selectMood('Grateful')"><span class="emoji">🙏</span>Grateful</button>
+        </div>
+        <div class="intensity-wrap">
+          <div class="intensity-label">Intensity <span id="intensity-val">5</span><span style="font-size:14px;color:var(--muted);font-weight:400;">/10</span></div>
+          <input type="range" min="1" max="10" value="5" id="intensity-slider" oninput="document.getElementById('intensity-val').textContent=this.value">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:4px;">
+        <button class="btn btn-primary" onclick="saveEntry()">✦ Save Entry</button>
+        <button class="btn btn-ghost"   onclick="clearForm()">Clear</button>
+      </div>
+
+      <div class="card" style="margin-top:24px;">
+        <div class="card-title"><span>◈</span> Recent Entries</div>
+        <div id="recent-entries-preview"></div>
+      </div>
+    </div>
+
+    <!-- ── TIMELINE PAGE ── -->
+    <div class="page" id="page-timeline">
+      <div class="page-header">
+        <h2>Mood <em>Timeline</em></h2>
+        <p>Your emotional journey, chronologically.</p>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-chip active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-chip" onclick="setFilter('Joy',this)">😊 Joy</button>
+        <button class="filter-chip" onclick="setFilter('Calm',this)">😌 Calm</button>
+        <button class="filter-chip" onclick="setFilter('Sad',this)">😢 Sad</button>
+        <button class="filter-chip" onclick="setFilter('Angry',this)">😠 Angry</button>
+        <button class="filter-chip" onclick="setFilter('Anxious',this)">😰 Anxious</button>
+        <button class="filter-chip" onclick="setFilter('Neutral',this)">😐 Neutral</button>
+        <button class="filter-chip" onclick="setFilter('Excited',this)">🤩 Excited</button>
+        <button class="filter-chip" onclick="setFilter('Grateful',this)">🙏 Grateful</button>
+      </div>
+      <div class="card"><div id="timeline-list"></div></div>
+    </div>
+
+    <!-- ── CALENDAR PAGE ── -->
+    <div class="page" id="page-calendar">
+      <div class="page-header">
+        <h2>Mood <em>Calendar</em></h2>
+        <p>Visualize your emotional patterns at a glance.</p>
+      </div>
+      <div class="card">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeCalMonth(-1)">‹</button>
+          <span class="cal-month" id="cal-month-label"></span>
+          <button class="cal-nav" onclick="changeCalMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="card" style="margin-top:0;">
+        <div class="card-title"><span>◉</span> Mood Legend</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <span class="mood-badge" style="background:var(--joy-bg);color:var(--joy);">😊 Joy</span>
+          <span class="mood-badge" style="background:var(--calm-bg);color:var(--calm);">😌 Calm</span>
+          <span class="mood-badge" style="background:var(--sad-bg);color:var(--sad);">😢 Sad</span>
+          <span class="mood-badge" style="background:var(--angry-bg);color:var(--angry);">😠 Angry</span>
+          <span class="mood-badge" style="background:var(--anxious-bg);color:var(--anxious);">😰 Anxious</span>
+          <span class="mood-badge" style="background:var(--neutral-bg);color:var(--neutral);">😐 Neutral</span>
+          <span class="mood-badge" style="background:var(--excited-bg);color:var(--excited);">🤩 Excited</span>
+          <span class="mood-badge" style="background:var(--grateful-bg);color:var(--grateful);">🙏 Grateful</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUMMARY PAGE ── -->
+    <div class="page" id="page-summary">
+      <div class="page-header">
+        <h2>Weekly <em>Summary</em></h2>
+        <p>Your emotional patterns from the past 7 days.</p>
+      </div>
+      <div class="grid-4" id="summary-stats"></div>
+      <div class="grid-2" style="margin-top:20px;">
+        <div class="card">
+          <div class="card-title"><span>◈</span> Mood Distribution</div>
+          <div id="mood-distribution"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>⬡</span> Daily Mood Pulse</div>
+          <div class="wave-chart-container" id="wave-chart-container">
+            <svg id="wave-svg" class="wave-chart-svg" height="160"></svg>
+            <div class="wave-tooltip" id="wave-tooltip"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INSIGHTS PAGE ── -->
+    <div class="page" id="page-insights">
+      <div class="page-header">
+        <h2>Insights & <em>Trends</em></h2>
+        <p>Rule-based analysis of your emotional patterns.</p>
+      </div>
+      <div id="mood-prediction"></div>
+      <div class="card">
+        <div class="card-title"><span>◉</span> Trend Analysis</div>
+        <div id="trend-analysis"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>◈</span> Emotional Volatility Index</div>
+        <div id="volatility-section"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>◇</span> Personal Insights</div>
+        <div id="insights-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>⬡</span> Keyword Correlations</div>
+        <div id="keyword-correlations"></div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS PAGE ── -->
+    <div class="page" id="page-analytics">
+      <div class="page-header">
+        <h2>Deep <em>Analytics</em></h2>
+        <p>Word frequency, sentiment scoring, and temporal patterns.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span>◐</span> Word Frequency Cloud</div>
+          <div class="word-cloud" id="word-cloud"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>◉</span> Sentiment Scoring</div>
+          <div id="sentiment-analysis"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>⬡</span> Monthly Mood Trend</div>
+        <div class="wave-chart-container" id="monthly-wave-container">
+          <svg id="monthly-wave-svg" class="wave-chart-svg" height="160"></svg>
+          <div class="wave-tooltip" id="monthly-tooltip"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>◈</span> Export Report</div>
+        <div style="margin-bottom:16px;color:var(--muted);font-size:14px;">Generate a comprehensive report of your mood data.</div>
+        <button class="btn btn-primary" onclick="exportReport()">📄 Download Report</button>
+        <button class="btn btn-ghost" style="margin-left:12px;" onclick="clearAllData()">🗑 Clear All Data</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════
+// CONSTANTS
+// ══════════════════════════════
+const MOODS = {
+  Joy:      { emoji:'😊', color:'var(--joy)',      bg:'var(--joy-bg)',      score:8,  positive:true  },
+  Calm:     { emoji:'😌', color:'var(--calm)',     bg:'var(--calm-bg)',     score:7,  positive:true  },
+  Sad:      { emoji:'😢', color:'var(--sad)',      bg:'var(--sad-bg)',      score:3,  positive:false },
+  Angry:    { emoji:'😠', color:'var(--angry)',    bg:'var(--angry-bg)',    score:2,  positive:false },
+  Anxious:  { emoji:'😰', color:'var(--anxious)',  bg:'var(--anxious-bg)',  score:3,  positive:false },
+  Neutral:  { emoji:'😐', color:'var(--neutral)',  bg:'var(--neutral-bg)',  score:5,  positive:null  },
+  Excited:  { emoji:'🤩', color:'var(--excited)',  bg:'var(--excited-bg)',  score:9,  positive:true  },
+  Grateful: { emoji:'🙏', color:'var(--grateful)', bg:'var(--grateful-bg)', score:8,  positive:true  },
+};
+
+// Ambient background colors per mood
+const MOOD_AMBIENT = {
+  Joy:      { light:'rgba(255,230,100,0.18)', dark:'rgba(212,160,23,0.12)' },
+  Calm:     { light:'rgba(100,220,180,0.18)', dark:'rgba(26,158,110,0.12)' },
+  Sad:      { light:'rgba(160,190,230,0.22)', dark:'rgba(74,143,209,0.15)' },
+  Angry:    { light:'rgba(230,120,120,0.18)', dark:'rgba(212,64,64,0.13)'  },
+  Anxious:  { light:'rgba(200,160,240,0.18)', dark:'rgba(155,93,229,0.13)' },
+  Neutral:  { light:'rgba(180,190,200,0.15)', dark:'rgba(107,124,141,0.10)'},
+  Excited:  { light:'rgba(255,180,100,0.20)', dark:'rgba(224,105,10,0.14)' },
+  Grateful: { light:'rgba(100,220,160,0.20)', dark:'rgba(26,170,106,0.14)' },
+};
+
+const STOPWORDS = new Set(['i','me','my','we','our','the','a','an','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','to','of','in','for','on','with','at','by','from','as','into','through','about','it','its','this','that','these','those','but','and','or','so','yet','not','no','nor','just','very','too','also','then','than','when','where','how','what','who','which','there','their','they','them','he','she','his','her','him','you','your','yours','us','feel','felt','like','get','got','day','time','today','really','know','think','make','see']);
+
+let state = {
+  entries: [],
+  filter: 'all',
+  calYear: new Date().getFullYear(),
+  calMonth: new Date().getMonth(),
+  selectedMood: null,
+  theme: 'light',
+};
+
+// ══════════════════════════════
+// STORAGE
+// ══════════════════════════════
+function loadState() {
+  try {
+    const saved = localStorage.getItem('luminary_v3');
+    if (saved) {
+      const p = JSON.parse(saved);
+      state.entries = p.entries || [];
+      state.theme = p.theme || 'light';
+    }
+  } catch(e) { state.entries = []; }
+}
+function saveState() {
+  try { localStorage.setItem('luminary_v3', JSON.stringify({ entries: state.entries, theme: state.theme })); }
+  catch(e) { showToast('Could not save data','error'); }
+}
+
+// ══════════════════════════════
+// THEME TOGGLE
+// ══════════════════════════════
+function toggleTheme() {
+  state.theme = state.theme === 'light' ? 'dark' : 'light';
+  applyTheme();
+  saveState();
+}
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', state.theme);
+  document.getElementById('theme-icon').textContent  = state.theme === 'light' ? '☀️' : '🌙';
+  document.getElementById('theme-label').textContent = state.theme === 'light' ? 'Light' : 'Dark';
+}
+
+// ══════════════════════════════
+// MOOD AMBIENT BG
+// ══════════════════════════════
+function setMoodAmbient(mood) {
+  const el = document.getElementById('mood-ambient');
+  if (!mood) { el.style.opacity = '0'; return; }
+  const colors = MOOD_AMBIENT[mood];
+  const color = colors[state.theme];
+  const moodData = MOODS[mood];
+
+  // Positive → brighter (radial from top), Negative → darker vignette from bottom
+  if (moodData.positive === true) {
+    el.style.background = `radial-gradient(ellipse 80% 60% at 50% 0%, ${color}, transparent)`;
+    el.style.opacity = '1';
+    // Body gets slightly brighter bg
+    document.body.style.setProperty('--bg-override', '');
+  } else if (moodData.positive === false) {
+    el.style.background = `radial-gradient(ellipse 80% 60% at 50% 100%, ${color}, transparent)`;
+    el.style.opacity = '1';
+  } else {
+    el.style.opacity = '0.4';
+    el.style.background = `radial-gradient(ellipse 60% 60% at 50% 50%, ${color}, transparent)`;
+  }
+}
+
+// ══════════════════════════════
+// NAV
+// ══════════════════════════════
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const nav = document.querySelector(`[onclick="showPage('${page}')"]`);
+  if (nav) nav.classList.add('active');
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+  if (page === 'timeline')  renderTimeline();
+  if (page === 'calendar')  renderCalendar();
+  if (page === 'summary')   renderSummary();
+  if (page === 'insights')  renderInsights();
+  if (page === 'analytics') renderAnalytics();
+  if (page === 'log')       renderRecentPreview();
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+
+// ══════════════════════════════
+// MOOD LOG
+// ══════════════════════════════
+function selectMood(mood) {
+  state.selectedMood = mood;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector(`[data-mood="${mood}"]`).classList.add('selected');
+  setMoodAmbient(mood);
+}
+
+function saveEntry() {
+  if (!state.selectedMood) { showToast('Please select a mood first','error'); return; }
+  const entry = {
+    id: Date.now().toString(),
+    date: document.getElementById('entry-date').value || new Date().toISOString().split('T')[0],
+    mood: state.selectedMood,
+    intensity: parseInt(document.getElementById('intensity-slider').value),
+    note: document.getElementById('quick-note').value.trim(),
+    reflection: document.getElementById('reflection-text').value.trim(),
+    timestamp: Date.now(),
+  };
+  state.entries.unshift(entry);
+  saveState();
+  clearForm();
+  renderRecentPreview();
+  showToast('✦ Mood entry saved','success');
+}
+
+function clearForm() {
+  state.selectedMood = null;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('intensity-slider').value = 5;
+  document.getElementById('intensity-val').textContent = '5';
+  document.getElementById('quick-note').value = '';
+  document.getElementById('reflection-text').value = '';
+  document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
+  setMoodAmbient(null);
+}
+
+function deleteEntry(id) {
+  state.entries = state.entries.filter(e => e.id !== id);
+  saveState();
+  renderTimeline();
+  renderRecentPreview();
+  showToast('Entry deleted');
+}
+
+function renderRecentPreview() {
+  const el = document.getElementById('recent-entries-preview');
+  const recent = state.entries.slice(0,3);
+  if (!recent.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:30px 0;"><span class="emoji">🌱</span><h3>No entries yet</h3><p>Write your first reflection and log a mood above.</p></div>`;
+    return;
+  }
+  el.innerHTML = recent.map(renderEntry).join('');
+}
+
+// ══════════════════════════════
+// TIMELINE
+// ══════════════════════════════
+function setFilter(f, el) {
+  state.filter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTimeline();
+}
+
+function renderTimeline() {
+  const el = document.getElementById('timeline-list');
+  let entries = [...state.entries].sort((a,b) => b.timestamp - a.timestamp);
+  if (state.filter !== 'all') entries = entries.filter(e => e.mood === state.filter);
+  if (!entries.length) {
+    el.innerHTML = `<div class="empty-state"><span class="emoji">📭</span><h3>Nothing here</h3><p>No entries match your filter.</p></div>`;
+    return;
+  }
+  el.innerHTML = entries.map(renderEntry).join('');
+}
+
+function renderEntry(e) {
+  const m = MOODS[e.mood];
+  const d = new Date(e.date + 'T12:00:00');
+  const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const dayStr  = d.toLocaleDateString('en-US',{weekday:'short'});
+  const hasRefl = e.reflection && e.reflection.length > 0;
+  return `<div class="timeline-entry">
+    <div class="timeline-left">
+      <div class="timeline-date">${dayStr}<br>${dateStr}</div>
+      <div class="timeline-dot-wrap" style="background:${m.bg};">${m.emoji}</div>
+    </div>
+    <div class="timeline-content">
+      <div class="timeline-header">
+        <span class="mood-badge" style="background:${m.bg};color:${m.color};">${e.mood}</span>
+        <span style="font-size:13px;color:var(--muted);">Intensity ${e.intensity}/10</span>
+        ${hasRefl ? `<button class="expand-btn" onclick="toggleReflection('${e.id}')">▼ Reflection</button>` : ''}
+        <button onclick="deleteEntry('${e.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;margin-left:auto;padding:2px 8px;">✕</button>
+      </div>
+      ${e.note ? `<div class="timeline-note">${escHtml(e.note)}</div>` : ''}
+      ${hasRefl ? `<div class="timeline-reflection" id="refl-${e.id}" style="border-left-color:${m.color};">${escHtml(e.reflection)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function toggleReflection(id) {
+  document.getElementById('refl-' + id)?.classList.toggle('open');
+}
+
+// ══════════════════════════════
+// CALENDAR
+// ══════════════════════════════
+function changeCalMonth(dir) {
+  state.calMonth += dir;
+  if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+  if (state.calMonth < 0)  { state.calMonth = 11; state.calYear--; }
+  renderCalendar();
+}
+function renderCalendar() {
+  const y = state.calYear, m = state.calMonth;
+  document.getElementById('cal-month-label').textContent =
+    new Date(y,m,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const entryMap = {};
+  state.entries.forEach(e => { (entryMap[e.date]=entryMap[e.date]||[]).push(e); });
+  const firstDay = new Date(y,m,1).getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const todayStr = new Date().toISOString().split('T')[0];
+  let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-cell empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const de=entryMap[ds]||[];
+    const mood=de.length?de[de.length-1].mood:null;
+    const mi=mood?MOODS[mood]:null;
+    html+=`<div class="cal-cell${mood?' has-mood':''}${ds===todayStr?' today':''}"
+      style="${mi?`background:${mi.bg};`:''}"
+      title="${de.length?de.map(e=>e.mood).join(', '):ds}">
+      <span class="day-num" style="${mi?`color:${mi.color}`:'color:var(--muted)'}">${d}</span>
+      ${mi?`<span class="day-emoji">${mi.emoji}</span>`:''}
+    </div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+// ══════════════════════════════
+// WEEKLY SUMMARY + WAVE CHART
+// ══════════════════════════════
+function renderSummary() {
+  const entries = state.entries.filter(e => e.timestamp >= Date.now() - 7*24*60*60*1000);
+  const statsEl = document.getElementById('summary-stats');
+
+  if (!entries.length) {
+    statsEl.innerHTML = `<div style="grid-column:1/-1;"><div class="empty-state"><span class="emoji">📊</span><h3>No data this week</h3><p>Log your first mood to see your weekly summary.</p></div></div>`;
+    document.getElementById('mood-distribution').innerHTML = '';
+    document.getElementById('wave-svg').innerHTML = '';
+    return;
+  }
+
+  const moodCounts = {};
+  entries.forEach(e => { moodCounts[e.mood]=(moodCounts[e.mood]||0)+1; });
+  const topMood = Object.entries(moodCounts).sort((a,b)=>b[1]-a[1])[0][0];
+  const avgScore = (entries.reduce((s,e)=>s+MOODS[e.mood].score*(e.intensity/5),0)/entries.length).toFixed(1);
+  const byDay = {};
+  entries.forEach(e => { (byDay[e.date]=byDay[e.date]||[]).push(e); });
+  const bestDay = Object.entries(byDay).sort((a,b)=>
+    b[1].reduce((s,e)=>s+MOODS[e.mood].score,0)/b[1].length -
+    a[1].reduce((s,e)=>s+MOODS[e.mood].score,0)/a[1].length)[0];
+  const bestDayLabel = bestDay ? new Date(bestDay[0]+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'}) : '—';
+
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Entries This Week</div><div class="stat-value">${entries.length}</div><div class="stat-sub">Logged moods</div></div>
+    <div class="stat-card"><div class="stat-label">Dominant Mood</div><div class="stat-value">${MOODS[topMood].emoji}</div><div class="stat-sub" style="color:${MOODS[topMood].color}">${topMood}</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Mood Score</div><div class="stat-value">${avgScore}<span style="font-size:15px;color:var(--muted)">/10</span></div><div class="stat-sub">Weighted average</div></div>
+    <div class="stat-card"><div class="stat-label">Best Day</div><div class="stat-value" style="font-size:20px;">${bestDayLabel}</div><div class="stat-sub">Highest mood score</div></div>`;
+
+  const total = entries.length;
+  document.getElementById('mood-distribution').innerHTML =
+    Object.entries(moodCounts).sort((a,b)=>b[1]-a[1]).map(([mood,count]) => {
+      const pct = Math.round(count/total*100);
+      const mi = MOODS[mood];
+      return `<div class="dist-row">
+        <div class="dist-label"><span style="font-size:14px;">${mi.emoji} ${mood}</span><span style="color:${mi.color};font-weight:600;">${pct}%</span></div>
+        <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct}%;background:${mi.color};"></div></div>
+      </div>`;
+    }).join('');
+
+  // Build 7-day data
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const ds=d.toISOString().split('T')[0];
+    const de=entries.filter(e=>e.date===ds);
+    const score=de.length?de.reduce((s,e)=>s+MOODS[e.mood].score,0)/de.length:null;
+    days.push({
+      label: d.toLocaleDateString('en-US',{weekday:'short'}),
+      score, mood: de[0]?.mood||null, date:ds
+    });
+  }
+  drawWaveChart('wave-svg','wave-tooltip', days);
+}
+
+// ── WAVE / SPLINE CHART ──────────────────────
+function drawWaveChart(svgId, tooltipId, days) {
+  const svg = document.getElementById(svgId);
+  const tooltip = document.getElementById(tooltipId);
+  const W = svg.parentElement.offsetWidth || 400;
+  const H = 150;
+  const PL = 28, PR = 20, PT = 20, PB = 36;
+  const chartW = W - PL - PR;
+  const chartH = H - PT - PB;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('height', H);
+
+  const validDays = days.filter(d => d.score !== null);
+  if (!validDays.length) { svg.innerHTML = `<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--muted)" font-size="14" font-family="DM Sans">No data for this period</text>`; return; }
+
+  const n = days.length;
+  const xStep = chartW / (n - 1);
+
+  // Points
+  const pts = days.map((d, i) => ({
+    x: PL + i * xStep,
+    y: d.score !== null ? PT + chartH - (d.score / 10) * chartH : null,
+    ...d,
+  }));
+
+  // Grid lines
+  let gridHtml = '';
+  for (let v = 0; v <= 10; v += 2) {
+    const y = PT + chartH - (v/10)*chartH;
+    gridHtml += `<line x1="${PL}" y1="${y}" x2="${PL+chartW}" y2="${y}" stroke="var(--paper-line)" stroke-width="1"/>`;
+    gridHtml += `<text x="${PL-6}" y="${y+4}" text-anchor="end" class="wave-score-label">${v}</text>`;
+  }
+
+  // Spline path through valid points only
+  const validPts = pts.filter(p => p.y !== null);
+  if (validPts.length < 2) {
+    // single dot
+    const p = validPts[0];
+    const moodColor = p.mood ? `var(--${p.mood.toLowerCase()})` : 'var(--accent)';
+    svg.innerHTML = gridHtml + `<circle cx="${p.x}" cy="${p.y}" r="7" fill="${moodColor}"/>`;
+    return;
+  }
+
+  // Catmull-Rom to bezier
+  function cmrToBez(pts) {
+    let d = `M ${pts[0].x},${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i-1)];
+      const p1 = pts[i];
+      const p2 = pts[i+1];
+      const p3 = pts[Math.min(pts.length-1, i+2)];
+      const cp1x = p1.x + (p2.x - p0.x)/6;
+      const cp1y = p1.y + (p2.y - p0.y)/6;
+      const cp2x = p2.x - (p3.x - p1.x)/6;
+      const cp2y = p2.y - (p3.y - p1.y)/6;
+      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+    return d;
+  }
+
+  const pathD = cmrToBez(validPts);
+
+  // Filled area
+  const areaD = pathD + ` L ${validPts[validPts.length-1].x},${PT+chartH} L ${validPts[0].x},${PT+chartH} Z`;
+
+  // Gradient id
+  const gradId = `wg-${svgId}`;
+
+  // Color based on avg score
+  const avgS = validPts.reduce((s,p)=>s+p.y,0)/validPts.length;
+  const avgScore = 10 - (avgS - PT) / chartH * 10;
+  const lineColor = avgScore >= 6 ? 'var(--calm)' : avgScore >= 4 ? 'var(--joy)' : 'var(--angry)';
+
+  // Day labels
+  let labelsHtml = days.map((d,i) => {
+    const x = PL + i * xStep;
+    return `<text x="${x}" y="${H-6}" text-anchor="middle" class="wave-day-label" style="font-size:12px;">${d.label}</text>`;
+  }).join('');
+
+  // Dots with hover
+  let dotsHtml = validPts.map((p,i) => {
+    const moodColor = p.mood ? `var(--${p.mood.toLowerCase()})` : lineColor;
+    return `<circle class="wave-dot" cx="${p.x}" cy="${p.y}" r="5.5" fill="${moodColor}" stroke="var(--surface)" stroke-width="2.5"
+      onmouseenter="showWaveTooltip(event,'${tooltipId}','${p.date}','${p.mood||''}',${p.score.toFixed(1)})"
+      onmouseleave="hideWaveTooltip('${tooltipId}')"/>`;
+  }).join('');
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="${lineColor}" stop-opacity="0.01"/>
+      </linearGradient>
+    </defs>
+    ${gridHtml}
+    <path d="${areaD}" fill="url(#${gradId})"/>
+    <path d="${pathD}" fill="none" stroke="${lineColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${labelsHtml}
+    ${dotsHtml}`;
+}
+
+function showWaveTooltip(event, tipId, date, mood, score) {
+  const tip = document.getElementById(tipId);
+  const mi = mood ? MOODS[mood] : null;
+  tip.innerHTML = `<strong>${date}</strong><br>${mi ? mi.emoji+' '+mood : ''} &nbsp; Score: <strong>${score}</strong>`;
+  tip.style.opacity = '1';
+  tip.style.left = (event.offsetX + 12) + 'px';
+  tip.style.top  = (event.offsetY - 40) + 'px';
+}
+function hideWaveTooltip(tipId) {
+  document.getElementById(tipId).style.opacity = '0';
+}
+
+// ══════════════════════════════
+// INSIGHTS
+// ══════════════════════════════
+function computeTrend() {
+  if (state.entries.length < 3) return 'insufficient';
+  const sorted = [...state.entries].sort((a,b)=>a.timestamp-b.timestamp);
+  const recent = sorted.slice(-3), older = sorted.slice(-6,-3);
+  if (!older.length) return 'insufficient';
+  const diff = recent.reduce((s,e)=>s+MOODS[e.mood].score,0)/recent.length -
+               older.reduce((s,e)=>s+MOODS[e.mood].score,0)/older.length;
+  return diff > 1 ? 'improving' : diff < -1 ? 'declining' : 'stable';
+}
+function computeVolatility() {
+  if (state.entries.length < 2) return 0;
+  const sorted = [...state.entries].sort((a,b)=>a.timestamp-b.timestamp).slice(-10);
+  let total=0;
+  for(let i=1;i<sorted.length;i++) total+=Math.abs(MOODS[sorted[i].mood].score-MOODS[sorted[i-1].mood].score);
+  return Math.min(1, total/((sorted.length-1)*9));
+}
+function predictNextMood() {
+  if (state.entries.length < 3) return null;
+  const sorted = [...state.entries].sort((a,b)=>a.timestamp-b.timestamp).slice(-5);
+  const counts = {};
+  sorted.forEach(e=>{counts[e.mood]=(counts[e.mood]||0)+1;});
+  sorted.slice(-2).forEach(e=>{counts[e.mood]=(counts[e.mood]||0)+1;});
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+}
+function getKeywordCorrelations() {
+  const corr = {};
+  state.entries.forEach(e => {
+    const text = ((e.note||'')+' '+(e.reflection||'')).toLowerCase();
+    text.split(/\W+/).filter(w=>w.length>3&&!STOPWORDS.has(w)).forEach(w=>{
+      if(!corr[w])corr[w]={};
+      corr[w][e.mood]=(corr[w][e.mood]||0)+1;
+    });
+  });
+  return Object.entries(corr).filter(([,m])=>Object.values(m).reduce((a,b)=>a+b,0)>=2)
+    .sort((a,b)=>Object.values(b[1]).reduce((x,y)=>x+y,0)-Object.values(a[1]).reduce((x,y)=>x+y,0)).slice(0,12);
+}
+function renderInsights() {
+  const prediction = predictNextMood();
+  document.getElementById('mood-prediction').innerHTML = prediction ? `
+    <div class="prediction-card">
+      <span class="prediction-emoji">${MOODS[prediction].emoji}</span>
+      <div class="prediction-text">
+        <h3>Tomorrow's Forecast: ${prediction}</h3>
+        <p>Based on your recent emotional patterns, <strong>${prediction}</strong> is your most probable mood tomorrow.</p>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted);">Deterministic forecast from weighted recent history</div>
+      </div>
+    </div>` : '';
+
+  const trendMap = {
+    improving:    {icon:'📈',label:'Improving',    color:'var(--calm)',   desc:'Your recent mood scores are higher than before. Keep going!'},
+    declining:    {icon:'📉',label:'Declining',    color:'var(--angry)',  desc:'Your mood has dipped recently. Consider self-care activities.'},
+    stable:       {icon:'➡️',label:'Stable',       color:'var(--neutral)',desc:'Your emotional state is consistent and balanced.'},
+    insufficient: {icon:'🌱',label:'Building Data',color:'var(--accent)', desc:'Log more entries to unlock your trend analysis.'},
+  };
+  const t = trendMap[computeTrend()];
+  document.getElementById('trend-analysis').innerHTML = `
+    <div style="display:flex;align-items:center;gap:20px;">
+      <span style="font-size:44px;">${t.icon}</span>
+      <div>
+        <div style="font-size:20px;font-weight:600;color:${t.color};font-family:'Playfair Display',serif;">${t.label}</div>
+        <div style="color:var(--muted);font-size:14px;margin-top:5px;">${t.desc}</div>
+      </div>
+    </div>`;
+
+  const vol=computeVolatility(), vPct=Math.round(vol*100);
+  const vLabel=vol<0.3?'Low — Emotionally consistent':vol<0.6?'Moderate — Some fluctuation':'High — Significant mood swings';
+  document.getElementById('volatility-section').innerHTML = `
+    <div style="margin-bottom:10px;display:flex;justify-content:space-between;font-size:14px;">
+      <span>${vLabel}</span><span style="color:var(--accent);font-weight:600;">${vPct}%</span>
+    </div>
+    <div class="volatility-meter"><div class="volatility-needle" style="left:${vPct}%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px;"><span>Stable</span><span>Volatile</span></div>`;
+
+  const insights = generateInsights();
+  document.getElementById('insights-list').innerHTML = insights.length
+    ? insights.map(i=>`<div class="insight-chip"><span class="insight-icon">${i.icon}</span><div class="insight-text"><strong>${i.title}</strong><span>${i.body}</span></div></div>`).join('')
+    : `<div class="empty-state" style="padding:30px 0;"><span class="emoji">🌿</span><h3>Keep logging</h3><p>Insights will appear as your mood history grows.</p></div>`;
+
+  const corrs = getKeywordCorrelations();
+  document.getElementById('keyword-correlations').innerHTML = corrs.length
+    ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">${corrs.map(([word,moods])=>{
+        const topMood=Object.entries(moods).sort((a,b)=>b[1]-a[1])[0][0];
+        const mi=MOODS[topMood];
+        const count=Object.values(moods).reduce((a,b)=>a+b,0);
+        return `<span class="corr-tag" style="background:${mi.bg};color:${mi.color};border-color:${mi.color}30;">${mi.emoji} ${word} <span style="opacity:0.6">(${count}×)</span></span>`;
+      }).join('')}</div>`
+    : `<div style="color:var(--muted);font-size:14px;">Add notes or reflections to see keyword correlations.</div>`;
+}
+
+function generateInsights() {
+  if(!state.entries.length) return [];
+  const insights=[], entries=[...state.entries].sort((a,b)=>a.timestamp-b.timestamp);
+  const dates=[...new Set(entries.map(e=>e.date))].sort();
+  let streak=1,maxStreak=1;
+  for(let i=1;i<dates.length;i++){
+    const diff=(new Date(dates[i])-new Date(dates[i-1]))/86400000;
+    if(diff===1){streak++;maxStreak=Math.max(maxStreak,streak);}else streak=1;
+  }
+  if(maxStreak>=3) insights.push({icon:'🔥',title:`${maxStreak}-day streak!`,body:`You've logged moods consistently for ${maxStreak} days in a row.`});
+  const pctPos=Math.round(entries.filter(e=>['Joy','Calm','Excited','Grateful'].includes(e.mood)).length/entries.length*100);
+  if(pctPos>=60) insights.push({icon:'☀️',title:'Predominantly Positive',body:`${pctPos}% of your entries reflect positive emotions. Wonderful!`});
+  if(pctPos<30)  insights.push({icon:'🌧️',title:'Emotional Low Period',body:`Only ${pctPos}% positive moods recently. Consider reaching out to someone.`});
+  if(entries.filter(e=>e.mood==='Anxious').length/entries.length>0.3) insights.push({icon:'🌀',title:'High Anxiety Pattern',body:'Anxious moods appear frequently. Breathing exercises may help.'});
+  if(entries.length>=10){
+    const allAvg=entries.reduce((s,e)=>s+MOODS[e.mood].score,0)/entries.length;
+    const recAvg=entries.slice(-5).reduce((s,e)=>s+MOODS[e.mood].score,0)/5;
+    if(recAvg>allAvg+1) insights.push({icon:'🌅',title:'Recent Upswing',body:`Your recent score (${recAvg.toFixed(1)}) is above your long-term average (${allAvg.toFixed(1)}).`});
+    if(recAvg<allAvg-1) insights.push({icon:'🌑',title:'Below Your Baseline',body:'Your mood is below your personal average. This is temporary.'});
+  }
+  return insights;
+}
+
+// ══════════════════════════════
+// ANALYTICS
+// ══════════════════════════════
+function computeSentiment(text) {
+  const pos=new Set(['happy','joy','love','great','amazing','wonderful','excellent','good','better','best','beautiful','grateful','thankful','peaceful','excited','hopeful','confident','proud','calm','serene','energetic','positive','bright','warm','kind','blessed','appreciate','enjoy','delight','smile','laugh']);
+  const neg=new Set(['sad','angry','hate','terrible','awful','horrible','bad','worse','worst','ugly','anxious','worried','scared','fear','lonely','depressed','stressed','frustrated','overwhelmed','tired','exhausted','hopeless','empty','lost','confused','hurt','pain','cry','upset','disappointed']);
+  let score=0,count=0;
+  text.toLowerCase().split(/\W+/).forEach(w=>{if(pos.has(w)){score++;count++;}if(neg.has(w)){score--;count++;}});
+  return count?score/count:0;
+}
+function getWordFrequency() {
+  const text=state.entries.map(e=>(e.note||'')+' '+(e.reflection||'')).join(' ').toLowerCase();
+  const freq={};
+  text.split(/\W+/).filter(w=>w.length>3&&!STOPWORDS.has(w)).forEach(w=>{freq[w]=(freq[w]||0)+1;});
+  return Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,30);
+}
+
+function renderAnalytics() {
+  const freq=getWordFrequency();
+  document.getElementById('word-cloud').innerHTML = freq.length
+    ? freq.map(([w,c])=>{const m=freq[0][1];return `<span class="word-chip" style="font-size:${0.8+(c/m)*1.0}em;opacity:${0.5+(c/m)*0.5};" title="${c} occurrences">${w}</span>`;}).join('')
+    : `<div style="color:var(--muted);font-size:14px;">Add notes and reflections to see word frequency.</div>`;
+
+  // Sentiment with horizontal bars
+  const refls=state.entries.filter(e=>e.reflection).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
+  const saEl=document.getElementById('sentiment-analysis');
+  if(!refls.length){
+    saEl.innerHTML=`<div style="color:var(--muted);font-size:14px;">Add reflections to entries to see sentiment analysis.</div>`;
+  } else {
+    const avg=refls.reduce((s,e)=>s+computeSentiment(e.reflection),0)/refls.length;
+    const label=avg>0.2?'Positive':avg<-0.2?'Negative':'Neutral';
+    const color=avg>0.2?'var(--calm)':avg<-0.2?'var(--angry)':'var(--neutral)';
+    saEl.innerHTML=`<div style="margin-bottom:18px;display:flex;align-items:center;gap:16px;">
+      <div style="font-family:'Playfair Display',serif;font-size:26px;color:${color};">${label}</div>
+      <div style="font-size:13px;color:var(--muted);">avg score ${(avg*10).toFixed(1)} / ±10</div>
+    </div>` +
+    refls.map(e=>{
+      const s=computeSentiment(e.reflection);
+      const c=s>0.2?'var(--calm)':s<-0.2?'var(--angry)':'var(--neutral)';
+      const barW=Math.abs(s)*100;
+      const sign=s>=0?'+':'';
+      return `<div class="sentiment-row">
+        <span style="font-size:12px;color:var(--muted);min-width:60px;">${e.date}</span>
+        <div class="sentiment-bar-track">
+          <div class="sentiment-bar-fill" style="width:${barW}%;background:${c};margin-left:${s>=0?'50%':'calc(50% - '+barW+'%)'}"></div>
+          <div style="position:absolute;top:0;left:50%;bottom:0;width:1.5px;background:var(--border);"></div>
+        </div>
+        <span style="font-size:13px;color:${c};min-width:38px;text-align:right;font-weight:600;">${sign}${(s*10).toFixed(1)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Monthly wave
+  const now=new Date(), months=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const mEntries=state.entries.filter(e=>{const ed=new Date(e.date);return ed.getFullYear()===d.getFullYear()&&ed.getMonth()===d.getMonth();});
+    const avg=mEntries.length?mEntries.reduce((s,e)=>s+MOODS[e.mood].score,0)/mEntries.length:null;
+    const best=mEntries.length?mEntries.reduce((a,b)=>MOODS[a.mood].score>MOODS[b.mood].score?a:b):null;
+    months.push({label:d.toLocaleDateString('en-US',{month:'short'}),score:avg,mood:best?.mood||null,date:d.toISOString().split('T')[0]});
+  }
+  drawWaveChart('monthly-wave-svg','monthly-tooltip',months);
+}
+
+// ══════════════════════════════
+// EXPORT
+// ══════════════════════════════
+function exportReport(){
+  const total=state.entries.length;
+  if(!total){showToast('No data to export','error');return;}
+  const counts={};
+  state.entries.forEach(e=>{counts[e.mood]=(counts[e.mood]||0)+1;});
+  const topMood=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  const avgScore=(state.entries.reduce((s,e)=>s+MOODS[e.mood].score,0)/total).toFixed(1);
+  const report=`LUMINARY MOOD REPORT\nGenerated: ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}\n${'='.repeat(50)}\n\nOVERVIEW\n--------\nTotal Entries: ${total}\nDominant Mood: ${topMood} ${MOODS[topMood].emoji}\nAverage Mood Score: ${avgScore}/10\nTrend: ${computeTrend().charAt(0).toUpperCase()+computeTrend().slice(1)}\nEmotional Volatility: ${Math.round(computeVolatility()*100)}%\n\nMOOD DISTRIBUTION\n-----------------\n${Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([m,c])=>`${MOODS[m].emoji} ${m}: ${c} entries (${Math.round(c/total*100)}%)`).join('\n')}\n\nRECENT ENTRIES (Last 10)\n------------------------\n${state.entries.slice(0,10).map(e=>`[${e.date}] ${e.mood} ${MOODS[e.mood].emoji} (Intensity: ${e.intensity}/10)${e.note?'\n  Note: '+e.note:''}${e.reflection?'\n  Reflection: '+e.reflection.slice(0,120)+'...':''}`).join('\n\n')}\n\n${'='.repeat(50)}\nGenerated by Luminary — Emotional Wellness Tracker`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([report],{type:'text/plain'}));
+  a.download=`luminary-report-${new Date().toISOString().split('T')[0]}.txt`;
+  a.click();
+  showToast('📄 Report downloaded!','success');
+}
+function clearAllData(){
+  if(!confirm('Are you sure? This will permanently delete all your mood entries.'))return;
+  state.entries=[];
+  saveState();
+  renderRecentPreview();
+  showToast('All data cleared');
+}
+
+// ══════════════════════════════
+// UTILS
+// ══════════════════════════════
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let toastTimer;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+function init(){
+  loadState();
+  applyTheme();
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('entry-date').value=today;
+  document.getElementById('paper-date-display').textContent=
+    new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  renderRecentPreview();
+  renderCalendar();
+
+  // Redraw charts on resize
+  window.addEventListener('resize', ()=>{
+    if(document.getElementById('page-summary').classList.contains('active')) renderSummary();
+    if(document.getElementById('page-analytics').classList.contains('active')) renderAnalytics();
+  });
+}
+init();
+</script>
+</body>
+</html>
